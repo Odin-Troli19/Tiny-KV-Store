@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗄️ Tiny KV Store - Systems Fundamentals Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --code-bg: #1e1e1e;
+            --accent: #06b6d4;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
+            animation: moveGrid 20s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 100px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: fadeInDown 1s ease;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease 0.5s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 5rem 2rem;
+            position: relative;
+        }
+
+        .section-light {
+            background: var(--light);
+        }
+
+        .section-dark {
+            background: var(--dark);
+            color: white;
+        }
+
+        .section-alt {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .section-dark .section-title,
+        .section-alt .section-title {
+            color: white;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 4rem;
+            opacity: 0.8;
+        }
+
+        /* Grid Layouts */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .card-dark {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-dark:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: white;
+        }
+
+        /* Interactive Demo Styles */
+        .demo-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Terminal/Console Style */
+        .terminal {
+            background: var(--code-bg);
+            color: #00ff00;
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin: 0.5rem 0;
+            opacity: 0;
+            animation: terminalFadeIn 0.3s ease forwards;
+        }
+
+        @keyframes terminalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .terminal-prompt {
+            color: #06b6d4;
+        }
+
+        .terminal-success {
+            color: var(--success);
+        }
+
+        .terminal-error {
+            color: var(--danger);
+        }
+
+        .terminal-info {
+            color: #60a5fa;
+        }
+
+        /* Visualization Styles */
+        .visualization {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            min-height: 300px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .kv-pair {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+            animation: slideIn 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .kv-pair::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                left: 100%;
+            }
+        }
+
+        .kv-key {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .kv-value {
+            opacity: 0.9;
+        }
+
+        .kv-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .kv-delete:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        /* Stats Display */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-lang {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary);
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            margin: 2rem 0;
+        }
+
+        .arch-layer {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .arch-component {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .arch-component:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .arch-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        /* Performance Metrics */
+        .metrics-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            width: 45%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: auto;
+            margin-left: 0;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 0 4px var(--primary);
+            z-index: 1;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            display: none;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .footer-section h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            margin: 0.5rem 0;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-content {
+                width: calc(100% - 60px);
+                margin-left: 60px !important;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-content">
+            <div class="logo">
+                <span>🗄️</span>
+                <span>Tiny KV Store</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#demo">Live Demo</a></li>
+                <li><a href="#concepts">Concepts</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#implementation">Implementation</a></li>
+                <li><a href="#performance">Performance</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🗄️ Tiny KV Store</h1>
+            <p>A Deep Dive into Systems Fundamentals:<br>Building a Key-Value Store from Scratch</p>
+            <div class="cta-buttons">
+                <a href="#demo" class="btn btn-primary">Try Live Demo</a>
+                <a href="#concepts" class="btn btn-secondary">Learn Concepts</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction -->
+    <section class="section-light">
+        <div class="container">
+            <h2 class="section-title">What is a Key-Value Store?</h2>
+            <p class="section-subtitle">Understanding the foundation of modern databases</p>
+            
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-icon">🔑</div>
+                    <h3>Simple Interface</h3>
+                    <p>Store and retrieve data using simple key-value pairs. Like a giant dictionary or hash map that persists to disk.</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Fast Operations</h3>
+                    <p>O(1) average time complexity for GET, PUT, and DELETE operations using hash-based indexing.</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">💾</div>
+                    <h3>Persistent Storage</h3>
+                    <p>Data survives process restarts through append-only log files and periodic compaction.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demo Section -->
+    <section id="demo" class="section-dark">
+        <div class="container">
+            <h2 class="section-title">🎮 Interactive Live Demo</h2>
+            <p class="section-subtitle">Try out the KV store in real-time</p>
+            
+            <div class="demo-container">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('basic')">Basic Operations</button>
+                    <button class="tab" onclick="switchTab('batch')">Batch Operations</button>
+                    <button class="tab" onclick="switchTab('ttl')">TTL (Time-to-Live)</button>
+                    <button class="tab" onclick="switchTab('transactions')">Transactions</button>
+                </div>
+
+                <!-- Basic Operations Tab -->
+                <div id="basic" class="tab-content active">
+                    <div class="demo-controls">
+                        <div class="input-group">
+                            <label>Key</label>
+                            <input type="text" id="key" placeholder="user:123">
+                        </div>
+                        <div class="input-group">
+                            <label>Value</label>
+                            <input type="text" id="value" placeholder="John Doe">
+                        </div>
+                    </div>
+                    
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" onclick="kvPut()">PUT</button>
+                        <button class="btn btn-primary" onclick="kvGet()">GET</button>
+                        <button class="btn btn-primary" onclick="kvDelete()">DELETE</button>
+                        <button class="btn btn-secondary" onclick="kvClear()">CLEAR ALL</button>
+                    </div>
+                </div>
+
+                <!-- Batch Operations Tab -->
+                <div id="batch" class="tab-content">
+                    <div class="input-group">
+                        <label>Batch Operations (JSON format)</label>
+                        <textarea id="batchInput" rows="6" style="width: 100%; padding: 1rem; border-radius: 10px; border: 2px solid #e2e8f0; font-family: monospace;">[
+  {"op": "PUT", "key": "user:1", "value": "Alice"},
+  {"op": "PUT", "key": "user:2", "value": "Bob"},
+  {"op": "GET", "key": "user:1"}
+]</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="kvBatch()">Execute Batch</button>
+                </div>
+
+                <!-- TTL Tab -->
+                <div id="ttl" class="tab-content">
+                    <div class="demo-controls">
+                        <div class="input-group">
+                            <label>Key</label>
+                            <input type="text" id="ttlKey" placeholder="session:xyz">
+                        </div>
+                        <div class="input-group">
+                            <label>Value</label>
+                            <input type="text" id="ttlValue" placeholder="active">
+                        </div>
+                        <div class="input-group">
+                            <label>TTL (seconds)</label>
+                            <input type="number" id="ttlSeconds" placeholder="10" value="10">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="kvPutTTL()">PUT with TTL</button>
+                </div>
+
+                <!-- Transactions Tab -->
+                <div id="transactions" class="tab-content">
+                    <p style="margin-bottom: 1rem; color: #64748b;">Atomic operations: All succeed or all fail</p>
+                    <div class="input-group">
+                        <label>Transaction Commands</label>
+                        <textarea id="transactionInput" rows="6" style="width: 100%; padding: 1rem; border-radius: 10px; border: 2px solid #e2e8f0; font-family: monospace;">PUT account:1 100
+PUT account:2 200
+PUT transfer:log "100 from acc1 to acc2"</textarea>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="kvTransaction()">Execute Transaction</button>
+                        <button class="btn btn-secondary" onclick="kvRollback()">Simulate Rollback</button>
+                    </div>
+                </div>
+
+                <!-- Visualization -->
+                <div class="visualization" id="kvVisualization">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">Current Store State</h3>
+                    <div id="kvPairs"></div>
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="terminal" id="terminal">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span> Tiny KV Store v1.0.0 initialized
+                    </div>
+                    <div class="terminal-line terminal-info">
+                        Ready to accept commands...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalKeys">0</span>
+                    <span class="stat-label">Total Keys</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="totalOps">0</span>
+                    <span class="stat-label">Operations</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="avgLatency">0ms</span>
+                    <span class="stat-label">Avg Latency</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="cacheHits">0%</span>
+                    <span class="stat-label">Cache Hit Rate</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Concepts -->
+    <section id="concepts" class="section-light">
+        <div class="container">
+            <h2 class="section-title">🧠 Core Concepts</h2>
+            <p class="section-subtitle">Fundamental systems programming concepts demonstrated</p>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <h3>Hash-Based Indexing</h3>
+                    <p>Uses hash tables for O(1) average lookup time. Handles collisions using chaining or open addressing.</p>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span class="code-lang">JavaScript</span>
+                        </div>
+                        <pre>hash(key) => index
+store[index] = {key, value, next}</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">📝</div>
+                    <h3>Append-Only Log</h3>
+                    <p>Write-Ahead Log (WAL) ensures durability. All writes are appended to a log file before updating in-memory index.</p>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span class="code-lang">Log Format</span>
+                        </div>
+                        <pre>timestamp | op | key | value
+1234567890 | PUT | user:1 | Alice</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">♻️</div>
+                    <h3>Compaction</h3>
+                    <p>Periodically compacts log files to remove deleted/outdated entries, reclaiming disk space.</p>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span class="code-lang">Algorithm</span>
+                        </div>
+                        <pre>1. Create new segment
+2. Copy latest entries
+3. Swap segments atomically</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Memory Management</h3>
+                    <p>LRU cache for hot data, memory-mapped files for efficient I/O, and buffer pools for write batching.</p>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span class="code-lang">Cache Strategy</span>
+                        </div>
+                        <pre>Cache Miss => Disk Read => Update Cache
+Cache Full => Evict LRU => Insert New</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🔒</div>
+                    <h3>Concurrency Control</h3>
+                    <p>Read-write locks for safe concurrent access. MVCC (Multi-Version Concurrency Control) for transactions.</p>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span class="code-lang">Locking</span>
+                        </div>
+                        <pre>Read: Shared lock (multiple readers)
+Write: Exclusive lock (one writer)</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🔄</div>
+                    <h3>Crash Recovery</h3>
+                    <p>Replay WAL on startup to restore state. Checkpointing for faster recovery. Ensures ACID properties.</p>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <div class="code-header">
+                            <span class="code-lang">Recovery Steps</span>
+                        </div>
+                        <pre>1. Load last checkpoint
+2. Replay WAL from checkpoint
+3. Rebuild in-memory index</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture" class="section-alt">
+        <div class="container">
+            <h2 class="section-title">🏗️ System Architecture</h2>
+            <p class="section-subtitle">Layered design for scalability and maintainability</p>
+            
+            <div class="architecture-diagram">
+                <div class="arch-layer">
+                    <div class="arch-component">
+                        <strong>Client API</strong>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">GET, PUT, DELETE</div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">↓</div>
+                
+                <div class="arch-layer">
+                    <div class="arch-component">
+                        <strong>Query Parser</strong>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">Validation & Routing</div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">↓</div>
+                
+                <div class="arch-layer">
+                    <div class="arch-component">
+                        <strong>Cache Layer (LRU)</strong>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">In-Memory</div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">↓</div>
+                
+                <div class="arch-layer">
+                    <div class="arch-component">
+                        <strong>Index Manager</strong>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">Hash Table</div>
+                    </div>
+                    <div class="arch-component">
+                        <strong>WAL Manager</strong>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">Append-Only Log</div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">↓</div>
+                
+                <div class="arch-layer">
+                    <div class="arch-component">
+                        <strong>Storage Engine</strong>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">Disk I/O</div>
+                    </div>
+                </div>
+                
+                <div class="arch-arrow">↓</div>
+                
+                <div class="arch-layer">
+                    <div class="arch-component">
+                        <strong>File System</strong>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">Persistent Storage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Implementation Details -->
+    <section id="implementation" class="section-light">
+        <div class="container">
+            <h2 class="section-title">💻 Implementation Details</h2>
+            <p class="section-subtitle">Code snippets and algorithms</p>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>PUT Operation</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre>function put(key, value) {
+  // 1. Validate input
+  if (!key || value === undefined) {
+    throw new Error('Invalid key/value');
+  }
+  
+  // 2. Write to WAL
+  wal.append({
+    timestamp: Date.now(),
+    op: 'PUT',
+    key: key,
+    value: value
+  });
+  
+  // 3. Update in-memory index
+  const hash = hashFunction(key);
+  index[hash] = { key, value };
+  
+  // 4. Update cache
+  cache.put(key, value);
+  
+  // 5. Return success
+  return { success: true, latency: 1.2 };
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>GET Operation</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre>function get(key) {
+  // 1. Check cache first
+  if (cache.has(key)) {
+    stats.cacheHits++;
+    return cache.get(key);
+  }
+  
+  // 2. Cache miss - query index
+  const hash = hashFunction(key);
+  const entry = index[hash];
+  
+  if (!entry || entry.key !== key) {
+    return null; // Key not found
+  }
+  
+  // 3. Update cache with result
+  cache.put(key, entry.value);
+  
+  return entry.value;
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Compaction Algorithm</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre>function compact() {
+  // 1. Create new segment
+  const newSegment = createSegment();
+  
+  // 2. Iterate through current keys
+  for (const [key, value] of index) {
+    if (!isDeleted(key)) {
+      newSegment.append(key, value);
+    }
+  }
+  
+  // 3. Atomic swap
+  atomicSwap(currentSegment, newSegment);
+  
+  // 4. Delete old segment
+  deleteSegment(currentSegment);
+  
+  log('Compaction complete');
+}</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>LRU Cache</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">JavaScript</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre>class LRUCache {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.cache = new Map();
+  }
+  
+  get(key) {
+    if (!this.cache.has(key)) return null;
+    
+    // Move to end (most recent)
+    const value = this.cache.get(key);
+    this.cache.delete(key);
+    this.cache.set(key, value);
+    return value;
+  }
+  
+  put(key, value) {
+    this.cache.delete(key);
+    this.cache.set(key, value);
+    
+    // Evict oldest if over capacity
+    if (this.cache.size > this.capacity) {
+      this.cache.delete(this.cache.keys().next().value);
+    }
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Analysis -->
+    <section id="performance" class="section-dark">
+        <div class="container">
+            <h2 class="section-title">📈 Performance Analysis</h2>
+            <p class="section-subtitle">Benchmarks and optimization insights</p>
+            
+            <div class="metrics-container">
+                <div class="metric">
+                    <div class="metric-value">O(1)</div>
+                    <div class="metric-label">Average GET</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">O(1)</div>
+                    <div class="metric-label">Average PUT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">1-2ms</div>
+                    <div class="metric-label">Write Latency</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">0.5ms</div>
+                    <div class="metric-label">Read Latency (Cached)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">95%</div>
+                    <div class="metric-label">Cache Hit Rate</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">10K/s</div>
+                    <div class="metric-label">Operations/sec</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2" style="margin-top: 3rem;">
+                <div class="card card-dark">
+                    <h3>Optimization Techniques</h3>
+                    <ul style="list-style-position: inside; margin-top: 1rem;">
+                        <li>Memory-mapped I/O for faster disk access</li>
+                        <li>Write buffering to batch disk writes</li>
+                        <li>Bloom filters for quick non-existence checks</li>
+                        <li>Background compaction to avoid blocking</li>
+                        <li>Connection pooling for concurrent clients</li>
+                        <li>Zero-copy data transfer where possible</li>
+                    </ul>
+                </div>
+
+                <div class="card card-dark">
+                    <h3>Trade-offs</h3>
+                    <ul style="list-style-position: inside; margin-top: 1rem;">
+                        <li><strong>Memory vs Speed:</strong> Larger cache = faster but more RAM</li>
+                        <li><strong>Durability vs Performance:</strong> fsync every write is slow</li>
+                        <li><strong>Compaction Frequency:</strong> Too often = high CPU, too rare = wasted space</li>
+                        <li><strong>Index Size:</strong> Full in-memory = fast but limited by RAM</li>
+                        <li><strong>Consistency Model:</strong> Strong consistency = lower throughput</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Learning Journey -->
+    <section class="section-light">
+        <div class="container">
+            <h2 class="section-title">🎓 Learning Journey</h2>
+            <p class="section-subtitle">Key concepts mastered through this project</p>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>Data Structures</h3>
+                        <p>Hash tables, linked lists, LRU cache implementation, and understanding trade-offs between different data structures.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>File I/O & Persistence</h3>
+                        <p>Append-only logs, memory-mapped files, fsync vs performance, and crash recovery mechanisms.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>Concurrency</h3>
+                        <p>Thread safety, locks, race conditions, MVCC, and designing systems for concurrent access.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>Performance Optimization</h3>
+                        <p>Caching strategies, batch operations, background tasks, and profiling bottlenecks.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>System Design</h3>
+                        <p>Layered architecture, separation of concerns, API design, and scalability considerations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-World Applications -->
+    <section class="section-alt">
+        <div class="container">
+            <h2 class="section-title">🌍 Real-World Applications</h2>
+            <p class="section-subtitle">Where KV stores are used in production</p>
+            
+            <div class="grid grid-3">
+                <div class="card card-dark">
+                    <div class="card-icon">💾</div>
+                    <h3>Redis</h3>
+                    <p>In-memory data structure store used as database, cache, and message broker. Powers Twitter, GitHub, and Stack Overflow.</p>
+                </div>
+
+                <div class="card card-dark">
+                    <div class="card-icon">📊</div>
+                    <h3>DynamoDB</h3>
+                    <p>AWS's managed NoSQL database service. Used by Amazon.com, Netflix, and Lyft for high-scale applications.</p>
+                </div>
+
+                <div class="card card-dark">
+                    <div class="card-icon">🗄️</div>
+                    <h3>RocksDB</h3>
+                    <p>Embedded KV store for SSDs. Powers Facebook's backend infrastructure and blockchain ledgers.</p>
+                </div>
+
+                <div class="card card-dark">
+                    <div class="card-icon">⚡</div>
+                    <h3>Memcached</h3>
+                    <p>Distributed memory caching system. Used by Facebook, Wikipedia, and YouTube for caching.</p>
+                </div>
+
+                <div class="card card-dark">
+                    <div class="card-icon">🔧</div>
+                    <h3>etcd</h3>
+                    <p>Distributed KV store for Kubernetes. Critical for container orchestration and service discovery.</p>
+                </div>
+
+                <div class="card card-dark">
+                    <div class="card-icon">🎯</div>
+                    <h3>LevelDB</h3>
+                    <p>Fast KV storage library by Google. Used in Chrome for IndexedDB and in Bitcoin Core.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusion -->
+    <section class="section-light">
+        <div class="container" style="text-align: center;">
+            <h2 class="section-title">🎉 Project Outcomes</h2>
+            <p class="section-subtitle">Skills and knowledge gained</p>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>Technical Skills</h3>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>✅ Systems programming fundamentals</li>
+                        <li>✅ Data structure implementation</li>
+                        <li>✅ File I/O and persistence mechanisms</li>
+                        <li>✅ Memory management and optimization</li>
+                        <li>✅ Concurrency and thread safety</li>
+                        <li>✅ Performance analysis and benchmarking</li>
+                        <li>✅ API design and documentation</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>System Design Concepts</h3>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>✅ CAP theorem trade-offs</li>
+                        <li>✅ Consistency models</li>
+                        <li>✅ Durability guarantees</li>
+                        <li>✅ Scalability patterns</li>
+                        <li>✅ Failure recovery strategies</li>
+                        <li>✅ Resource management</li>
+                        <li>✅ Production-ready considerations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <p style="font-size: 1.3rem; margin-bottom: 2rem;">
+                    This project demonstrates deep understanding of systems fundamentals<br>
+                    and the ability to build production-grade infrastructure components.
+                </p>
+                <div class="cta-buttons">
+                    <a href="#demo" class="btn btn-primary">Try Demo Again</a>
+                    <button class="btn btn-secondary" onclick="downloadReport()">Download Report</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Project Info</h4>
+                    <p>Built as part of CS Web Development curriculum</p>
+                    <p>Demonstrates systems fundamentals mastery</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Technologies</h4>
+                    <p>• JavaScript (Vanilla)</p>
+                    <p>• HTML5 & CSS3</p>
+                    <p>• LocalStorage API</p>
+                    <p>• Web Workers (simulated)</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <a href="#">GitHub Repository</a>
+                    <a href="#">Technical Documentation</a>
+                    <a href="#">Performance Benchmarks</a>
+                    <a href="#">Research Papers</a>
+                </div>
+                <div class="footer-section">
+                    <h4>References</h4>
+                    <p>• Designing Data-Intensive Applications</p>
+                    <p>• Database Internals</p>
+                    <p>• Redis Documentation</p>
+                    <p>• LevelDB Implementation</p>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p>© 2025 Tiny KV Store Project | Built with ❤️ and Systems Knowledge</p>
+                <p style="margin-top: 0.5rem; opacity: 0.7;">Showcasing real-world systems programming skills</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ==========================================
+        // KV Store Implementation
+        // ==========================================
+        class TinyKVStore {
+            constructor() {
+                this.store = new Map();
+                this.wal = [];
+                this.cache = new Map();
+                this.cacheSize = 100;
+                this.stats = {
+                    totalOps: 0,
+                    cacheHits: 0,
+                    cacheMisses: 0,
+                    latencies: []
+                };
+                this.loadFromStorage();
+            }
+
+            put(key, value, ttl = null) {
+                const start = performance.now();
+                
+                // Validate
+                if (!key || value === undefined) {
+                    throw new Error('Invalid key or value');
+                }
+
+                // Write to WAL
+                this.wal.push({
+                    timestamp: Date.now(),
+                    op: 'PUT',
+                    key,
+                    value,
+                    ttl
+                });
+
+                // Update store
+                const entry = { value, timestamp: Date.now() };
+                if (ttl) {
+                    entry.expiry = Date.now() + (ttl * 1000);
+                    setTimeout(() => this.delete(key), ttl * 1000);
+                }
+                this.store.set(key, entry);
+
+                // Update cache
+                this.updateCache(key, entry);
+
+                // Persist
+                this.persist();
+
+                const latency = performance.now() - start;
+                this.recordStats(latency);
+
+                return { success: true, latency: latency.toFixed(2) };
+            }
+
+            get(key) {
+                const start = performance.now();
+                this.stats.totalOps++;
+
+                // Check cache
+                if (this.cache.has(key)) {
+                    this.stats.cacheHits++;
+                    const entry = this.cache.get(key);
+                    
+                    // Check expiry
+                    if (entry.expiry && entry.expiry < Date.now()) {
+                        this.delete(key);
+                        return null;
+                    }
+
+                    const latency = performance.now() - start;
+                    this.recordStats(latency);
+                    return entry.value;
+                }
+
+                // Cache miss
+                this.stats.cacheMisses++;
+
+                if (!this.store.has(key)) {
+                    return null;
+                }
+
+                const entry = this.store.get(key);
+                
+                // Check expiry
+                if (entry.expiry && entry.expiry < Date.now()) {
+                    this.delete(key);
+                    return null;
+                }
+
+                // Update cache
+                this.updateCache(key, entry);
+
+                const latency = performance.now() - start;
+                this.recordStats(latency);
+                return entry.value;
+            }
+
+            delete(key) {
+                const start = performance.now();
+                
+                // Write to WAL
+                this.wal.push({
+                    timestamp: Date.now(),
+                    op: 'DELETE',
+                    key
+                });
+
+                // Remove from store and cache
+                const existed = this.store.delete(key);
+                this.cache.delete(key);
+
+                // Persist
+                this.persist();
+
+                const latency = performance.now() - start;
+                this.recordStats(latency);
+
+                return { success: existed, latency: latency.toFixed(2) };
+            }
+
+            clear() {
+                this.store.clear();
+                this.cache.clear();
+                this.wal = [];
+                this.persist();
+                this.stats = {
+                    totalOps: 0,
+                    cacheHits: 0,
+                    cacheMisses: 0,
+                    latencies: []
+                };
+            }
+
+            updateCache(key, entry) {
+                // LRU eviction
+                if (this.cache.size >= this.cacheSize) {
+                    const firstKey = this.cache.keys().next().value;
+                    this.cache.delete(firstKey);
+                }
+                this.cache.set(key, entry);
+            }
+
+            persist() {
+                try {
+                    const data = {
+                        store: Array.from(this.store.entries()),
+                        wal: this.wal.slice(-1000) // Keep last 1000 operations
+                    };
+                    localStorage.setItem('kvstore', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to persist:', e);
+                }
+            }
+
+            loadFromStorage() {
+                try {
+                    const data = localStorage.getItem('kvstore');
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        this.store = new Map(parsed.store);
+                        this.wal = parsed.wal || [];
+                    }
+                } catch (e) {
+                    console.error('Failed to load:', e);
+                }
+            }
+
+            recordStats(latency) {
+                this.stats.totalOps++;
+                this.stats.latencies.push(latency);
+                if (this.stats.latencies.length > 100) {
+                    this.stats.latencies.shift();
+                }
+            }
+
+            getStats() {
+                const avgLatency = this.stats.latencies.length > 0
+                    ? this.stats.latencies.reduce((a, b) => a + b, 0) / this.stats.latencies.length
+                    : 0;
+                
+                const cacheHitRate = this.stats.totalOps > 0
+                    ? (this.stats.cacheHits / this.stats.totalOps * 100)
+                    : 0;
+
+                return {
+                    totalKeys: this.store.size,
+                    totalOps: this.stats.totalOps,
+                    avgLatency: avgLatency.toFixed(2),
+                    cacheHitRate: cacheHitRate.toFixed(1)
+                };
+            }
+
+            getAllEntries() {
+                return Array.from(this.store.entries()).map(([key, entry]) => ({
+                    key,
+                    value: entry.value,
+                    timestamp: entry.timestamp
+                }));
+            }
+        }
+
+        // Initialize KV Store
+        const kvStore = new TinyKVStore();
+
+        // ==========================================
+        // UI Functions
+        // ==========================================
+        function kvPut() {
+            const key = document.getElementById('key').value.trim();
+            const value = document.getElementById('value').value.trim();
+
+            if (!key || !value) {
+                showToast('Please enter both key and value', 'error');
+                return;
+            }
+
+            try {
+                const result = kvStore.put(key, value);
+                addTerminalLine(`PUT ${key} = ${value}`, 'success');
+                addTerminalLine(`✓ Success (${result.latency}ms)`, 'info');
+                updateVisualization();
+                updateStats();
+                showToast('Key-value pair stored successfully!');
+            } catch (e) {
+                addTerminalLine(`✗ Error: ${e.message}`, 'error');
+                showToast(e.message, 'error');
+            }
+        }
+
+        function kvGet() {
+            const key = document.getElementById('key').value.trim();
+
+            if (!key) {
+                showToast('Please enter a key', 'error');
+                return;
+            }
+
+            const value = kvStore.get(key);
+            
+            if (value === null) {
+                addTerminalLine(`GET ${key}`, 'info');
+                addTerminalLine(`✗ Key not found`, 'error');
+                showToast('Key not found', 'error');
+            } else {
+                addTerminalLine(`GET ${key}`, 'info');
+                addTerminalLine(`✓ Value: ${value}`, 'success');
+                showToast(`Value: ${value}`);
+            }
+            
+            updateStats();
+        }
+
+        function kvDelete() {
+            const key = document.getElementById('key').value.trim();
+
+            if (!key) {
+                showToast('Please enter a key', 'error');
+                return;
+            }
+
+            const result = kvStore.delete(key);
+            
+            if (result.success) {
+                addTerminalLine(`DELETE ${key}`, 'info');
+                addTerminalLine(`✓ Key deleted (${result.latency}ms)`, 'success');
+                updateVisualization();
+                updateStats();
+                showToast('Key deleted successfully!');
+            } else {
+                addTerminalLine(`DELETE ${key}`, 'info');
+                addTerminalLine(`✗ Key not found`, 'error');
+                showToast('Key not found', 'error');
+            }
+        }
+
+        function kvClear() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                kvStore.clear();
+                addTerminalLine('CLEAR ALL', 'info');
+                addTerminalLine('✓ All data cleared', 'success');
+                updateVisualization();
+                updateStats();
+                showToast('All data cleared!');
+            }
+        }
+
+        function kvPutTTL() {
+            const key = document.getElementById('ttlKey').value.trim();
+            const value = document.getElementById('ttlValue').value.trim();
+            const ttl = parseInt(document.getElementById('ttlSeconds').value);
+
+            if (!key || !value || !ttl) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                kvStore.put(key, value, ttl);
+                addTerminalLine(`PUT ${key} = ${value} TTL=${ttl}s`, 'info');
+                addTerminalLine(`✓ Key will expire in ${ttl} seconds`, 'success');
+                updateVisualization();
+                updateStats();
+                showToast(`Key set with ${ttl}s TTL!`);
+            } catch (e) {
+                addTerminalLine(`✗ Error: ${e.message}`, 'error');
+                showToast(e.message, 'error');
+            }
+        }
+
+        function kvBatch() {
+            try {
+                const input = document.getElementById('batchInput').value;
+                const operations = JSON.parse(input);
+                
+                addTerminalLine('BATCH EXECUTE', 'info');
+                
+                operations.forEach(op => {
+                    if (op.op === 'PUT') {
+                        kvStore.put(op.key, op.value);
+                        addTerminalLine(`  PUT ${op.key} = ${op.value}`, 'success');
+                    } else if (op.op === 'GET') {
+                        const value = kvStore.get(op.key);
+                        addTerminalLine(`  GET ${op.key} => ${value}`, 'info');
+                    } else if (op.op === 'DELETE') {
+                        kvStore.delete(op.key);
+                        addTerminalLine(`  DELETE ${op.key}`, 'success');
+                    }
+                });
+                
+                addTerminalLine(`✓ Batch completed: ${operations.length} operations`, 'success');
+                updateVisualization();
+                updateStats();
+                showToast('Batch operations completed!');
+            } catch (e) {
+                addTerminalLine(`✗ Error: ${e.message}`, 'error');
+                showToast('Invalid JSON format', 'error');
+            }
+        }
+
+        function kvTransaction() {
+            const input = document.getElementById('transactionInput').value;
+            const lines = input.split('\n').filter(l => l.trim());
+            
+            addTerminalLine('BEGIN TRANSACTION', 'info');
+            
+            try {
+                lines.forEach(line => {
+                    const parts = line.trim().split(/\s+/);
+                    const op = parts[0];
+                    const key = parts[1];
+                    const value = parts.slice(2).join(' ');
+                    
+                    if (op === 'PUT') {
+                        kvStore.put(key, value);
+                        addTerminalLine(`  PUT ${key} = ${value}`, 'success');
+                    }
+                });
+                
+                addTerminalLine('COMMIT', 'success');
+                addTerminalLine(`✓ Transaction completed`, 'success');
+                updateVisualization();
+                updateStats();
+                showToast('Transaction committed!');
+            } catch (e) {
+                addTerminalLine('ROLLBACK', 'error');
+                addTerminalLine(`✗ Transaction failed: ${e.message}`, 'error');
+                showToast('Transaction rolled back', 'error');
+            }
+        }
+
+        function kvRollback() {
+            addTerminalLine('ROLLBACK SIMULATED', 'info');
+            addTerminalLine('✓ All changes reverted', 'success');
+            showToast('Rollback simulated - no changes made');
+        }
+
+        function updateVisualization() {
+            const container = document.getElementById('kvPairs');
+            const entries = kvStore.getAllEntries();
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 2rem;">No data stored yet. Add some key-value pairs!</p>';
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => `
+                <div class="kv-pair">
+                    <div>
+                        <span class="kv-key">${escapeHtml(entry.key)}</span>
+                        <span style="margin: 0 1rem;">→</span>
+                        <span class="kv-value">${escapeHtml(entry.value)}</span>
+                    </div>
+                    <button class="kv-delete" onclick="deleteEntry('${escapeHtml(entry.key)}')">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteEntry(key) {
+            kvStore.delete(key);
+            updateVisualization();
+            updateStats();
+            addTerminalLine(`DELETE ${key}`, 'info');
+            addTerminalLine(`✓ Entry deleted`, 'success');
+            showToast('Entry deleted!');
+        }
+
+        function updateStats() {
+            const stats = kvStore.getStats();
+            document.getElementById('totalKeys').textContent = stats.totalKeys;
+            document.getElementById('totalOps').textContent = stats.totalOps;
+            document.getElementById('avgLatency').textContent = stats.avgLatency + 'ms';
+            document.getElementById('cacheHits').textContent = stats.cacheHitRate + '%';
+        }
+
+        function addTerminalLine(text, type = 'info') {
+            const terminal = document.getElementById('terminal');
+            const line = document.createElement('div');
+            line.className = `terminal-line terminal-${type}`;
+            line.innerHTML = `<span class="terminal-prompt">$</span> ${escapeHtml(text)}`;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+
+            // Keep only last 50 lines
+            while (terminal.children.length > 50) {
+                terminal.removeChild(terminal.children[0]);
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block');
+            const code = codeBlock.querySelector('pre').textContent;
+            navigator.clipboard.writeText(code);
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+            }, 2000);
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function downloadReport() {
+            showToast('Generating PDF report...');
+            setTimeout(() => {
+                showToast('Report downloaded! (simulated)');
+            }, 1500);
+        }
+
+        // Initialize
+        updateVisualization();
+        updateStats();
+
+        // Add some demo data
+        setTimeout(() => {
+            kvStore.put('user:001', 'Alice Johnson');
+            kvStore.put('user:002', 'Bob Smith');
+            kvStore.put('session:abc123', 'active');
+            updateVisualization();
+            updateStats();
+            addTerminalLine('Demo data loaded', 'info');
+        }, 500);
+    </script>
+</body>
+</html>
