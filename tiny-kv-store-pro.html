@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗄️ Tiny KV Store Pro - Advanced Systems Fundamentals</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --code-bg: #1e1e1e;
+            --accent: #06b6d4;
+            --bg-gradient-1: #667eea;
+            --bg-gradient-2: #764ba2;
+        }
+
+        [data-theme="dark"] {
+            --primary: #60a5fa;
+            --secondary: #a78bfa;
+            --success: #34d399;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --info: #22d3ee;
+            --dark: #f8fafc;
+            --light: #0f172a;
+            --code-bg: #000000;
+            --accent: #22d3ee;
+            --bg-gradient-1: #1e293b;
+            --bg-gradient-2: #0f172a;
+        }
+
+        [data-theme="cyberpunk"] {
+            --primary: #ff00ff;
+            --secondary: #00ffff;
+            --success: #00ff00;
+            --danger: #ff0066;
+            --warning: #ffff00;
+            --info: #00ffff;
+            --dark: #ffffff;
+            --light: #0a0a0a;
+            --code-bg: #1a001a;
+            --accent: #ff00ff;
+            --bg-gradient-1: #1a001a;
+            --bg-gradient-2: #001a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation with Search */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        [data-theme="dark"] nav,
+        [data-theme="cyberpunk"] nav {
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 3rem 0.75rem 1rem;
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            font-size: 0.95rem;
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(180deg);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></svg>');
+            animation: moveGrid 20s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 100px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: fadeInDown 1s ease;
+            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease;
+            opacity: 0.9;
+        }
+
+        .version-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease 0.5s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 5rem 2rem;
+            position: relative;
+        }
+
+        .section-light {
+            background: var(--light);
+        }
+
+        .section-dark {
+            background: var(--dark);
+            color: white;
+        }
+
+        .section-alt {
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .section-dark .section-title,
+        .section-alt .section-title {
+            color: white;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 4rem;
+            opacity: 0.8;
+        }
+
+        /* Grid Layouts */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* Enhanced Card */
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .card,
+        [data-theme="cyberpunk"] .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Tabs with Animation */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px 10px 0 0;
+            padding: 0.5rem;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .tab.active::after {
+            width: 80%;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Enhanced Demo Container */
+        .demo-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+
+        [data-theme="dark"] .demo-container,
+        [data-theme="cyberpunk"] .demo-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Enhanced Terminal */
+        .terminal {
+            background: var(--code-bg);
+            color: #00ff00;
+            padding: 1.5rem;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .terminal::before {
+            content: '●●●';
+            position: absolute;
+            top: 0.5rem;
+            left: 1rem;
+            color: #ff5f56;
+            letter-spacing: 5px;
+        }
+
+        .terminal-line {
+            margin: 0.5rem 0;
+            opacity: 0;
+            animation: terminalFadeIn 0.3s ease forwards;
+        }
+
+        @keyframes terminalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .terminal-prompt {
+            color: #06b6d4;
+        }
+
+        .terminal-success {
+            color: var(--success);
+        }
+
+        .terminal-error {
+            color: var(--danger);
+        }
+
+        .terminal-info {
+            color: #60a5fa;
+        }
+
+        .terminal-warning {
+            color: var(--warning);
+        }
+
+        /* Visualization */
+        .visualization {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            min-height: 300px;
+            border: 2px solid #e2e8f0;
+        }
+
+        [data-theme="dark"] .visualization,
+        [data-theme="cyberpunk"] .visualization {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .kv-pair {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+            animation: slideInKV 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideInKV {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .kv-pair::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to { left: 100%; }
+        }
+
+        .kv-key {
+            font-weight: bold;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .kv-value {
+            opacity: 0.9;
+            max-width: 40%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .kv-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .kv-delete,
+        .kv-edit {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .kv-edit {
+            background: var(--info);
+        }
+
+        .kv-delete:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .kv-edit:hover {
+            background: #0891b2;
+            transform: scale(1.05);
+        }
+
+        /* Enhanced Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.5rem;
+            animation: countUp 1s ease;
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .chart-card,
+        [data-theme="cyberpunk"] .chart-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .chart {
+            height: 250px;
+            position: relative;
+        }
+
+        /* Monitoring Dashboard */
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .monitor-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .monitor-card,
+        [data-theme="cyberpunk"] .monitor-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--accent);
+        }
+
+        .monitor-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .monitor-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .monitor-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .monitor-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Modal Enhanced */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.5s ease;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .modal-content,
+        [data-theme="cyberpunk"] .modal-content {
+            background: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-100px) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--primary);
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .close-modal:hover {
+            background: var(--primary);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* Toast Enhanced */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10001;
+            display: none;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.warning {
+            background: var(--warning);
+        }
+
+        .toast.info {
+            background: var(--info);
+        }
+
+        /* Command Palette */
+        .command-palette {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            max-width: 90vw;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 10002;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        [data-theme="dark"] .command-palette,
+        [data-theme="cyberpunk"] .command-palette {
+            background: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .command-input {
+            width: 100%;
+            padding: 1.5rem;
+            border: none;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 1.1rem;
+            border-radius: 15px 15px 0 0;
+            background: transparent;
+            color: var(--dark);
+        }
+
+        .command-input:focus {
+            outline: none;
+            border-bottom-color: var(--primary);
+        }
+
+        .command-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .command-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .command-item:hover,
+        .command-item.selected {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .command-shortcut {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Code Block Enhanced */
+        .code-block {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            position: relative;
+            margin: 1rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-lang {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+        }
+
+        /* Keyboard Shortcuts Help */
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .shortcut-key {
+            font-family: 'Courier New', monospace;
+            background: var(--dark);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        [data-theme="dark"] .shortcut-key,
+        [data-theme="cyberpunk"] .shortcut-key {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(37, 99, 235, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.success { background: var(--success); }
+        .badge.danger { background: var(--danger); }
+        .badge.warning { background: var(--warning); }
+        .badge.info { background: var(--info); }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        [data-theme="dark"] footer,
+        [data-theme="cyberpunk"] footer {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .footer-section h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            margin: 0.5rem 0;
+            transition: color 0.3s;
+        }
+
+        [data-theme="dark"] .footer-section a,
+        [data-theme="cyberpunk"] .footer-section a {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .footer-section a:hover {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.2rem; }
+            .section-title { font-size: 2rem; }
+            .nav-content { flex-wrap: wrap; }
+            .search-container { order: 3; width: 100%; margin-top: 1rem; }
+            .charts-container { grid-template-columns: 1fr; }
+            .command-palette { width: 95vw; }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+        .p-1 { padding: 1rem; }
+        .p-2 { padding: 2rem; }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-content">
+            <div class="logo" onclick="scrollToTop()">
+                <span>🗄️</span>
+                <span>Tiny KV Store Pro</span>
+            </div>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search documentation... (Ctrl+K)" id="globalSearch">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" onclick="openImportExport()">📥 Import/Export</button>
+                <button class="nav-btn" onclick="showKeyboardShortcuts()">⌨️</button>
+                <button class="theme-toggle" onclick="cycleTheme()" id="themeToggle">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="version-badge">v2.0.0 - Pro Edition</div>
+            <h1>🗄️ Tiny KV Store Pro</h1>
+            <p>Advanced Systems Fundamentals with Real-Time Monitoring,<br>Data Visualization, and Production-Grade Features</p>
+            <div class="cta-buttons">
+                <a href="#demo" class="btn btn-primary">Try Advanced Demo</a>
+                <a href="#features" class="btn btn-secondary">Explore Features</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Features Overview -->
+    <section id="features" class="section-light">
+        <div class="container">
+            <h2 class="section-title">🚀 New Advanced Features</h2>
+            <p class="section-subtitle">Production-grade capabilities added to the Pro version</p>
+            
+            <div class="grid grid-4">
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <h3>Data Visualization</h3>
+                    <p>Real-time charts showing operations, latency, cache performance</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">📥</div>
+                    <h3>Import/Export</h3>
+                    <p>JSON, CSV export and bulk import with validation</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">🔐</div>
+                    <h3>Encryption</h3>
+                    <p>AES encryption for sensitive data with secure key management</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">🗜️</div>
+                    <h3>Compression</h3>
+                    <p>LZ-based compression for storage optimization</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">🔍</div>
+                    <h3>Advanced Search</h3>
+                    <p>Prefix search, regex patterns, full-text search</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">⌨️</div>
+                    <h3>Keyboard Shortcuts</h3>
+                    <p>Command palette and shortcuts for power users</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">📈</div>
+                    <h3>Real-Time Monitoring</h3>
+                    <p>Live metrics, performance graphs, resource usage</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">🎨</div>
+                    <h3>Themes</h3>
+                    <p>Light, Dark, and Cyberpunk themes with custom CSS</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">🔄</div>
+                    <h3>Replication Simulator</h3>
+                    <p>Visualize master-slave replication patterns</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">💾</div>
+                    <h3>Storage Analyzer</h3>
+                    <p>Analyze space usage, identify large keys</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">🔔</div>
+                    <h3>Notifications</h3>
+                    <p>Real-time alerts for important events</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">📝</div>
+                    <h3>Query History</h3>
+                    <p>Track and replay previous operations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Demo Section -->
+    <section id="demo" class="section-dark">
+        <div class="container">
+            <h2 class="section-title">🎮 Advanced Interactive Demo</h2>
+            <p class="section-subtitle">Try all Pro features in real-time</p>
+            
+            <div class="demo-container">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('basic')">Basic Operations</button>
+                    <button class="tab" onclick="switchTab('batch')">Batch Operations</button>
+                    <button class="tab" onclick="switchTab('advanced')">Advanced Query</button>
+                    <button class="tab" onclick="switchTab('encryption')">Encryption</button>
+                    <button class="tab" onclick="switchTab('monitoring')">Monitoring</button>
+                </div>
+
+                <!-- Basic Operations Tab -->
+                <div id="basic" class="tab-content active">
+                    <div class="demo-controls">
+                        <div class="input-group">
+                            <label>Key</label>
+                            <input type="text" id="key" placeholder="user:123" autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <label>Value</label>
+                            <input type="text" id="value" placeholder="John Doe" autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <label>TTL (seconds, optional)</label>
+                            <input type="number" id="ttl" placeholder="0 = no expiry" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" onclick="kvPut()">📝 PUT</button>
+                        <button class="btn btn-primary" onclick="kvGet()">📖 GET</button>
+                        <button class="btn btn-primary" onclick="kvDelete()">🗑️ DELETE</button>
+                        <button class="btn btn-secondary" onclick="kvExists()">❓ EXISTS</button>
+                        <button class="btn btn-secondary" onclick="kvKeys()">🔑 KEYS</button>
+                        <button class="btn btn-secondary" onclick="kvClear()">🧹 CLEAR ALL</button>
+                    </div>
+                </div>
+
+                <!-- Batch Operations Tab -->
+                <div id="batch" class="tab-content">
+                    <div class="input-group">
+                        <label>Batch Operations (JSON format)</label>
+                        <textarea id="batchInput" rows="10" style="width: 100%; padding: 1rem; border-radius: 10px; border: 2px solid #e2e8f0; font-family: monospace; background: var(--light); color: var(--dark);">[
+  {"op": "PUT", "key": "user:1", "value": "Alice", "ttl": 300},
+  {"op": "PUT", "key": "user:2", "value": "Bob"},
+  {"op": "GET", "key": "user:1"},
+  {"op": "DELETE", "key": "user:3"}
+]</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="kvBatch()">⚡ Execute Batch</button>
+                    <button class="btn btn-secondary" onclick="validateBatch()">✓ Validate JSON</button>
+                </div>
+
+                <!-- Advanced Query Tab -->
+                <div id="advanced" class="tab-content">
+                    <div class="input-group">
+                        <label>Query Type</label>
+                        <select id="queryType">
+                            <option value="prefix">Prefix Search</option>
+                            <option value="regex">Regex Pattern</option>
+                            <option value="range">Range Query</option>
+                            <option value="size">Keys by Size</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Query Pattern</label>
+                        <input type="text" id="queryPattern" placeholder="user:* or ^user:\d+$">
+                    </div>
+                    <button class="btn btn-primary" onclick="kvAdvancedQuery()">🔍 Execute Query</button>
+                    <div id="queryResults" class="mt-2"></div>
+                </div>
+
+                <!-- Encryption Tab -->
+                <div id="encryption" class="tab-content">
+                    <div class="demo-controls">
+                        <div class="input-group">
+                            <label>Key (for encrypted storage)</label>
+                            <input type="text" id="encKey" placeholder="secret:password">
+                        </div>
+                        <div class="input-group">
+                            <label>Value (will be encrypted)</label>
+                            <input type="text" id="encValue" placeholder="MySuperSecretPassword123!">
+                        </div>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" onclick="kvPutEncrypted()">🔐 PUT Encrypted</button>
+                        <button class="btn btn-primary" onclick="kvGetDecrypted()">🔓 GET Decrypted</button>
+                    </div>
+                    <div class="mt-2">
+                        <p style="color: #64748b; font-size: 0.9rem;">
+                            ℹ️ Values are encrypted using AES-256. The encryption key is derived from a master password.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Monitoring Tab -->
+                <div id="monitoring" class="tab-content">
+                    <h3 class="mb-1" style="color: var(--primary);">Real-Time System Metrics</h3>
+                    <div class="monitoring-grid">
+                        <div class="monitor-card">
+                            <div class="monitor-label">Memory Usage</div>
+                            <div class="monitor-value" id="memUsage">0 KB</div>
+                            <div class="monitor-bar">
+                                <div class="monitor-bar-fill" id="memBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-label">Operations/sec</div>
+                            <div class="monitor-value" id="opsPerSec">0</div>
+                            <div class="monitor-bar">
+                                <div class="monitor-bar-fill" id="opsBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-label">Cache Efficiency</div>
+                            <div class="monitor-value" id="cacheEff">0%</div>
+                            <div class="monitor-bar">
+                                <div class="monitor-bar-fill" id="cacheBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="monitor-card">
+                            <div class="monitor-label">Avg Latency</div>
+                            <div class="monitor-value" id="avgLat">0ms</div>
+                            <div class="monitor-bar">
+                                <div class="monitor-bar-fill" id="latBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-container mt-2">
+                        <div class="chart-card">
+                            <div class="chart-title">Operations Over Time</div>
+                            <div class="chart" id="opsChart">
+                                <canvas id="opsCanvas" width="400" height="250"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">Latency Distribution</div>
+                            <div class="chart" id="latencyChart">
+                                <canvas id="latencyCanvas" width="400" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization -->
+                <div class="visualization" id="kvVisualization">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="color: var(--primary); margin: 0;">Current Store State</h3>
+                        <div>
+                            <button class="btn btn-secondary" onclick="exportData()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📥 Export</button>
+                            <button class="btn btn-secondary" onclick="analyzeStorage()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📊 Analyze</button>
+                        </div>
+                    </div>
+                    <div id="kvPairs"></div>
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="terminal" id="terminal">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span> Tiny KV Store Pro v2.0.0 initialized
+                    </div>
+                    <div class="terminal-line terminal-info">
+                        ✓ Advanced features loaded: Encryption, Compression, Monitoring
+                    </div>
+                    <div class="terminal-line terminal-info">
+                        Ready to accept commands... (Press Ctrl+K for command palette)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalKeys">0</span>
+                    <span class="stat-label">Total Keys</span>
+                    <span class="stat-change" id="keysChange">—</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="totalOps">0</span>
+                    <span class="stat-label">Operations</span>
+                    <span class="stat-change" id="opsChange">—</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="avgLatency">0ms</span>
+                    <span class="stat-label">Avg Latency</span>
+                    <span class="stat-change" id="latChange">—</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="cacheHits">0%</span>
+                    <span class="stat-label">Cache Hit Rate</span>
+                    <span class="stat-change" id="cacheChange">—</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="storageSize">0 KB</span>
+                    <span class="stat-label">Storage Used</span>
+                    <span class="stat-change" id="storageChange">—</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="encryptedKeys">0</span>
+                    <span class="stat-label">Encrypted Keys</span>
+                    <span class="stat-change">🔐</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Command Palette -->
+    <div class="command-palette" id="commandPalette">
+        <input type="text" class="command-input" id="commandInput" placeholder="Type a command...">
+        <div class="command-results" id="commandResults"></div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal" id="shortcutsModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('shortcutsModal')">&times;</span>
+            <h2 style="color: var(--primary); margin-bottom: 2rem;">⌨️ Keyboard Shortcuts</h2>
+            <div class="shortcuts-grid">
+                <div class="shortcut-item">
+                    <span>Open Command Palette</span>
+                    <span class="shortcut-key">Ctrl+K</span>
+                </div>
+                <div class="shortcut-item">
+                    <span>Quick PUT</span>
+                    <span class="shortcut-key">Ctrl+P</span>
+                </div>
+                <div class="shortcut-item">
+                    <span>Quick GET</span>
+                    <span class="shortcut-key">Ctrl+G</span>
+                </div>
+                <div class="shortcut-item">
+                    <span>Toggle Theme</span>
+                    <span class="shortcut-key">Ctrl+T</span>
+                </div>
+                <div class="shortcut-item">
+                    <span>Clear All</span>
+                    <span class="shortcut-key">Ctrl+Shift+C</span>
+                </div>
+                <div class="shortcut-item">
+                    <span>Export Data</span>
+                    <span class="shortcut-key">Ctrl+E</span>
+                </div>
+                <div class="shortcut-item">
+                    <span>Show Stats</span>
+                    <span class="shortcut-key">Ctrl+S</span>
+                </div>
+                <div class="shortcut-item">
+                    <span>Help</span>
+                    <span class="shortcut-key">Ctrl+H</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import/Export Modal -->
+    <div class="modal" id="importExportModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('importExportModal')">&times;</span>
+            <h2 style="color: var(--primary); margin-bottom: 2rem;">📥 Import / Export Data</h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchImportExportTab('export')">Export</button>
+                <button class="tab" onclick="switchImportExportTab('import')">Import</button>
+            </div>
+
+            <div id="export" class="tab-content active">
+                <h3 class="mb-1">Export Format</h3>
+                <select id="exportFormat" class="input-group" style="width: 100%; padding: 0.75rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                    <option value="txt">Plain Text</option>
+                </select>
+                <button class="btn btn-primary" onclick="performExport()">📥 Download Export</button>
+                <div id="exportPreview" class="code-block mt-2" style="max-height: 300px; overflow-y: auto; display: none;"></div>
+            </div>
+
+            <div id="import" class="tab-content">
+                <h3 class="mb-1">Import Data</h3>
+                <input type="file" id="importFile" accept=".json,.csv,.txt" style="margin-bottom: 1rem;">
+                <button class="btn btn-primary" onclick="performImport()">📤 Import File</button>
+                <div id="importResults" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Tiny KV Store Pro</h4>
+                    <p>Advanced key-value store with production-grade features</p>
+                    <p style="margin-top: 1rem;">
+                        <span class="badge">v2.0.0</span>
+                        <span class="badge success">Pro</span>
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>New Features</h4>
+                    <a href="#features">Data Visualization</a>
+                    <a href="#demo">Real-Time Monitoring</a>
+                    <a href="#demo">Encryption & Security</a>
+                    <a href="#demo">Advanced Search</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <a href="#" onclick="return false;">Documentation</a>
+                    <a href="#" onclick="return false;">API Reference</a>
+                    <a href="#" onclick="return false;">GitHub Repository</a>
+                    <a href="#" onclick="showKeyboardShortcuts(); return false;">Keyboard Shortcuts</a>
+                </div>
+                <div class="footer-section">
+                    <h4>System Stats</h4>
+                    <p>Keys: <strong id="footerKeys">0</strong></p>
+                    <p>Operations: <strong id="footerOps">0</strong></p>
+                    <p>Storage: <strong id="footerStorage">0 KB</strong></p>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p>© 2025 Tiny KV Store Pro | Built with ❤️ and Advanced Systems Knowledge</p>
+                <p style="margin-top: 0.5rem; opacity: 0.7;">Demonstrating production-grade systems programming skills</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="tiny-kv-store-pro.js"></script>
+</body>
+</html>
